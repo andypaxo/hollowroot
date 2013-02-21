@@ -7,7 +7,9 @@ io.set('log level', 1);
 
 app.use(express.static(__dirname + '/public'));
 
-var players = {};
+var players = {
+	gremlin: {x:200, y:200}
+};
 
 io.sockets.on('connection', function (socket) {
 
@@ -39,5 +41,16 @@ setInterval(tick, 500);
 
 function tick()
 {
+	var gremlin = players.gremlin;
+	gremlin.x += Math.random() * 10 - 5;
+	gremlin.x %= 400;
+	if (gremlin.x < 0)
+		gremlin.x += 400;
+
+	gremlin.y += Math.random() * 10 - 5;
+	gremlin.y %= 400;
+	if (gremlin.y < 0)
+		gremlin.y += 400;
+
 	io.sockets.emit('status', {players_online:players});
 }
