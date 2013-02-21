@@ -52,5 +52,8 @@ $(function () {
 		if (window.requestAnimationFrame)
 			window.requestAnimationFrame(drawFrame);
 	};
+
 	drawFrame();
+	if (!window.requestAnimationFrame)
+		window.setInterval(drawFrame, 100);
 });
