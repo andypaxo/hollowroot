@@ -12,12 +12,18 @@ var players = {};
 io.sockets.on('connection', function (socket) {
 
 	console.log(socket.id + ' connected');
-	players[socket.id] = {};
+	players[socket.id] = {x:20,y:20};
 	socket.emit('allocate-id', {id:socket.id});
   
 	socket.on('chat-message', function (data) {
 		console.log(socket.id + ' said: ' + data.text);
 		socket.broadcast.emit('chat-message', {text:data.text,name:socket.id});
+	});
+
+	socket.on('move-player', function (data) {
+		console.log(socket.id + ' moved to ' + data.x + ', ' + data.y);
+		players[socket.id].x = data.x;
+		players[socket.id].y = data.y;
 	});
 
 	socket.on('disconnect', function () {
