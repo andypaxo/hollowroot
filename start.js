@@ -8,7 +8,7 @@ io.set('log level', 1);
 app.use(express.static(__dirname + '/public'));
 
 var players = {
-	gremlin: {x:200, y:200}
+	gremlin: {name:'gremlin', x:200, y:200}
 };
 
 io.sockets.on('connection', function (socket) {
@@ -16,6 +16,10 @@ io.sockets.on('connection', function (socket) {
 	console.log(socket.id + ' connected');
 	players[socket.id] = {x:20,y:20};
 	socket.emit('allocate-id', {id:socket.id});
+
+	socket.on('identify', function (data) {
+		players[socket.id].name = data.name;
+	});
   
 	socket.on('chat-message', function (data) {
 		console.log(socket.id + ' said: ' + data.text);
