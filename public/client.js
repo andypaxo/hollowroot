@@ -1,11 +1,20 @@
 $(function () {
 	var socket = io.connect(document.location.origin);
 	var my_identifier = '';
-	var my_name = make_name();
+	var me = {
+		name:make_name(),
+		image:Math.floor(Math.random() * 64)
+	};
 	var canvas = $('#play-canvas')[0].getContext('2d');
+	canvas.mozImageSmoothing = false;
+	canvas.webkitImageSmoothingEnabled = false;
+	canvas.imageSmoothing = false;
 	var players = {};
 
-	$('#your-name').val(my_name);
+	var player_images = new Image();
+	player_images.src="/lofi_char.png";
+
+	$('#your-name').val(me.name);
 
 	$('#chatbox').submit(function(e) {
 		e.preventDefault();
@@ -13,7 +22,7 @@ $(function () {
 		var message_text = chatbox_input.val();
 		if (message_text.length > 0) {
 			socket.emit('chat-message', {text:message_text});
-			log_chat(my_identifier, message_text);
+			log_chat(me.name, message_text);
 		}
 		chatbox_input.val('');
 	});
@@ -27,7 +36,7 @@ $(function () {
 	});
 
 	socket.on('connect', function() {
-		socket.emit('identify', {name:my_name});
+		socket.emit('identify', me);
 	});
 
 	socket.on('allocate-id', function(data) {
@@ -56,13 +65,17 @@ $(function () {
 	}
 
 	var drawFrame = function() {
-		canvas.fillStyle = '#ddeeff';
+		canvas.fillStyle = '#221100';
 		canvas.fillRect(0, 0, 400, 400);
 		
-		canvas.fillStyle = '#111111';
+		canvas.fillStyle = '#22ff22';
+		var strip_width = player_images.width / 8;
 		for (player_id in players) {
 			var player = players[player_id];
 			canvas.fillText(player.name, player.x, player.y);
+			canvas.drawImage(player_images,
+				8 * (player.image % strip_width), 8 * Math.floor(player.image / strip_width), 8, 8,
+				player.x, player.y, 16, 16);
 		};
 
 	};
