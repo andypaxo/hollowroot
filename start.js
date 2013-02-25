@@ -24,7 +24,7 @@ io.sockets.on('connection', function (socket) {
   
 	socket.on('chat-message', function (data) {
 		console.log(socket.id + ' said: ' + data.text);
-		socket.broadcast.emit('chat-message', {text:data.text,name:socket.id});
+		socket.broadcast.emit('chat-message', {text:data.text,name:players[socket.id].name});
 	});
 
 	socket.on('move-player', function (data) {
