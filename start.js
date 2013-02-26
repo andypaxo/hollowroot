@@ -10,7 +10,7 @@ app.use(express.static(__dirname + '/public'));
 var players = {
 	gremlin: {name:'gremlin', x:200, y:200, image:80}
 };
-var walk_speed = 32;
+var walk_speed = 92;
 var time_step = .5;
 
 io.sockets.on('connection', function (socket) {

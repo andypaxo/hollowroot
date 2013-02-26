@@ -11,6 +11,7 @@ $(function () {
 	canvas.imageSmoothing = false;
 	var time_offset = 0;
 	var players = {};
+	var time_step = 1;
 
 	var player_images = new Image();
 	player_images.src="/lofi_char.png";
@@ -65,9 +66,28 @@ $(function () {
 		return pick_random_from(names) + '-' + pick_random_from(names);
 	}
 
+	function moveTowardDestination(player) {
+		var time = now();
+		var destination = player.destination;
+		if(destination.eta > time  + time_step) {
+			var x_displacement = time_step * (destination.x - player.x) / (destination.eta - time);
+			var y_displacement = time_step * (destination.y - player.y) / (destination.eta - time);
+			player.x += x_displacement;
+			player.y += y_displacement;
+		} else {
+			player.x = destination.x;
+			player.y = destination.y;
+		}
+	}
+
 	// Drawing
 
 	var drawFrame = function() {
+		time_step = now() - last_time;
+		last_time = now();
+
+		movePlayers();
+
 		canvas.fillStyle = '#221100';
 		canvas.fillRect(0, 0, 400, 400);
 		
@@ -81,9 +101,36 @@ $(function () {
 				player.x, player.y, 16, 16);
 		};
 
+		if (window.requestAnimationFrame)
+			window.requestAnimationFrame(drawFrame);
 	};
 
-	window.setInterval(drawFrame, 50);
+	var last_time = now();
+	if (window.requestAnimationFrame)
+		window.requestAnimationFrame(drawFrame);
+	else
+		window.setInterval(drawFrame, 50);
+
+
+	function movePlayers() {
+		for(var id in players)
+			if (players[id].destination)
+				moveTowardDestination(players[id]);
+	}
+
+	function moveTowardDestination(player) {
+		var time = now();
+		var destination = player.destination;
+		if(destination.eta > time  + time_step) {
+			var x_displacement = time_step * (destination.x - player.x) / (destination.eta - time);
+			var y_displacement = time_step * (destination.y - player.y) / (destination.eta - time);
+			player.x += x_displacement;
+			player.y += y_displacement;
+		} else {
+			player.x = destination.x;
+			player.y = destination.y;
+		}
+	}
 
 	// Utility
 
