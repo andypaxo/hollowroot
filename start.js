@@ -93,8 +93,7 @@ function moveTowardDestination(player) {
 // Utility
 
 function now() {
-	// Server runs ahead of local client - testing only
-	return new Date().getTime() /  1000;// + (1000 * 60 * 5);
+	return new Date().getTime() /  1000;
 }
 
 function distance(x1, y1, x2, y2) {

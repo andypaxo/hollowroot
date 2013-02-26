@@ -119,7 +119,7 @@ $(function () {
 	}
 
 	function moveTowardDestination(player) {
-		var time = now();
+		var time = now() + time_offset;
 		var destination = player.destination;
 		if(destination.eta > time  + time_step) {
 			var x_displacement = time_step * (destination.x - player.x) / (destination.eta - time);
