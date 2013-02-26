@@ -10,12 +10,14 @@ app.use(express.static(__dirname + '/public'));
 var players = {
 	gremlin: {name:'gremlin', x:200, y:200, image:80}
 };
+var walk_speed = 32;
+var time_step = .5;
 
 io.sockets.on('connection', function (socket) {
 
 	console.log(socket.id + ' connected');
 	players[socket.id] = {x:20,y:20};
-	socket.emit('allocate-id', {id:socket.id});
+	socket.emit('allocate-id', {id:socket.id, now:now()});
 
 	socket.on('identify', function (data) {
 		players[socket.id].name = data.name;
@@ -29,8 +31,12 @@ io.sockets.on('connection', function (socket) {
 
 	socket.on('move-player', function (data) {
 		console.log(socket.id + ' moved to ' + data.x + ', ' + data.y);
-		players[socket.id].x = data.x;
-		players[socket.id].y = data.y;
+		c_player = players[socket.id]
+		c_player.destination = {
+			x : data.x,
+			y : data.y,
+			eta : now() + distance(c_player.x, c_player.y, data.x, data.y) / walk_speed
+		};
 	});
 
 	socket.on('disconnect', function () {
@@ -42,10 +48,16 @@ io.sockets.on('connection', function (socket) {
 
 server.listen(80);
 
-setInterval(tick, 500);
+setInterval(tick, time_step * 1000);
 
-function tick()
-{
+function tick() {
+	moveGremlin();
+	movePlayers();
+
+	io.sockets.emit('status', {players_online:players});
+}
+
+function moveGremlin() {
 	var gremlin = players.gremlin;
 	gremlin.x += Math.random() * 10 - 5;
 	gremlin.x %= 400;
@@ -56,6 +68,35 @@ function tick()
 	gremlin.y %= 400;
 	if (gremlin.y < 0)
 		gremlin.y += 400;
+}
 
-	io.sockets.emit('status', {players_online:players});
+function movePlayers() {
+	for(var id in players)
+		if (players[id].destination)
+			moveTowardDestination(players[id]);
+}
+
+function moveTowardDestination(player) {
+	var time = now();
+	var destination = player.destination;
+	if(destination.eta > time  + time_step) {
+		var x_displacement = time_step * (destination.x - player.x) / (destination.eta - time);
+		var y_displacement = time_step * (destination.y - player.y) / (destination.eta - time);
+		player.x += x_displacement;
+		player.y += y_displacement;
+	} else {
+		player.x = destination.x;
+		player.y = destination.y;
+	}
+}
+
+// Utility
+
+function now() {
+	// Server runs ahead of local client - testing only
+	return new Date().getTime() /  1000;// + (1000 * 60 * 5);
+}
+
+function distance(x1, y1, x2, y2) {
+	return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 }

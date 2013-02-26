@@ -9,6 +9,7 @@ $(function () {
 	canvas.mozImageSmoothing = false;
 	canvas.webkitImageSmoothingEnabled = false;
 	canvas.imageSmoothing = false;
+	var time_offset = 0;
 	var players = {};
 
 	var player_images = new Image();
@@ -31,8 +32,8 @@ $(function () {
 		var posX = $(this).offset().left, posY = $(this).offset().top;
 		var x = e.pageX - posX, y = e.pageY - posY;
 		socket.emit('move-player', {x:x,y:y});
-		players[my_identifier].x = x;
-		players[my_identifier].y = y;
+		//players[my_identifier].x = x;
+		//players[my_identifier].y = y;
 	});
 
 	socket.on('connect', function() {
@@ -41,7 +42,11 @@ $(function () {
 
 	socket.on('allocate-id', function(data) {
 		my_identifier = data.id;
+		// Not currently accounting for latency
+		time_offset = data.now - now();
+		console.log('Time offset = ' + time_offset);
 	});
+
 	socket.on('chat-message', function(data) {
 		log_chat(data.name, data.text);
 	});
@@ -60,9 +65,7 @@ $(function () {
 		return pick_random_from(names) + '-' + pick_random_from(names);
 	}
 
-	function pick_random_from(array) {
-		return array[Math.floor(Math.random() * array.length)];
-	}
+	// Drawing
 
 	var drawFrame = function() {
 		canvas.fillStyle = '#221100';
@@ -81,4 +84,14 @@ $(function () {
 	};
 
 	window.setInterval(drawFrame, 50);
+
+	// Utility
+
+	function now() { 
+		return new Date().getTime() / 1000;
+	}
+
+	function pick_random_from(array) {
+		return array[Math.floor(Math.random() * array.length)];
+	}
 });
