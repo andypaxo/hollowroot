@@ -2,7 +2,7 @@ $(function () {
 	var socket = io.connect(document.location.origin);
 	var my_identifier = '';
 	var me = {
-		name:make_name(),
+		name:makeName(),
 		image:Math.floor(Math.random() * 64)
 	};
 	var canvas = $('#play-canvas')[0].getContext('2d');
@@ -22,7 +22,7 @@ $(function () {
 		var message_text = chatbox_input.val();
 		if (message_text.length > 0) {
 			socket.emit('chat-message', {text:message_text});
-			log_chat(me.name, message_text);
+			logChat(me.name, message_text);
 		}
 		chatbox_input.val('');
 	});
@@ -45,7 +45,7 @@ $(function () {
 	});
 
 	socket.on('chat-message', function(data) {
-		log_chat(data.name, data.text);
+		logChat(data.name, data.text);
 	});
 
 	socket.on('status', function(data) {
@@ -53,13 +53,27 @@ $(function () {
 		$('#status-users').text(Object.keys(world.players).length);
 	});
 
-	function log_chat(name, message_text) {
+	function updatePlayers(players) {
+		for (var player_id in players) {
+			var server_player = players[player_id];
+			var local_player = world.players[player_id];
+			local_player.destination = server_player.destination;
+			if (world.distance(server_player, local_player) > 24) {
+				local_player.x = server_player.x;
+				local_player.y = server_player.y;
+			}
+			// local_player.x = (server_player.x + local_player.x) / 2;
+			// local_player.y = (server_player.y + local_player.y) / 2;
+		}
+	}
+
+	function logChat(name, message_text) {
 		$('<p/>').text(name + ' : ' + message_text).appendTo('#chat-messages');
 	}
 
-	function make_name() {
+	function makeName() {
 		var names = ['Tik', 'Bok', 'Toc', 'Pon', 'Kip', 'Bin', 'Fon'];
-		return pick_random_from(names) + '-' + pick_random_from(names);
+		return pickRandomFrom(names) + '-' + pickRandomFrom(names);
 	}
 
 	// Drawing
@@ -91,7 +105,7 @@ $(function () {
 
 	// Utility
 
-	function pick_random_from(array) {
+	function pickRandomFrom(array) {
 		return array[Math.floor(Math.random() * array.length)];
 	}
 });

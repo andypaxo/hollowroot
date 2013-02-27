@@ -36,6 +36,6 @@ World.prototype.now = function() {
 	return new Date().getTime() /  1000 + this.time_offset;
 }
 
-World.prototype.distance = function(x1, y1, x2, y2) {
-	return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+World.prototype.distance = function(obj1, obj2) {
+	return Math.sqrt(Math.pow(obj2.x - obj1.x, 2) + Math.pow(obj2.y - obj1.y, 2));
 }

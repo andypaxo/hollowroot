@@ -11,7 +11,7 @@ io.set('log level', 1);
 app.use(express.static(__dirname + '/public'));
 
 var walk_speed = 92;
-var time_step = .5;
+var time_step = .4;
 
 io.sockets.on('connection', function (socket) {
 
@@ -35,7 +35,7 @@ io.sockets.on('connection', function (socket) {
 		c_player.destination = {
 			x : data.x,
 			y : data.y,
-			eta : world.now() + world.distance(c_player.x, c_player.y, data.x, data.y) / walk_speed
+			eta : world.now() + world.distance(c_player, data) / walk_speed
 		};
 	});
 
