@@ -10,6 +10,7 @@ $(function () {
 	canvas.webkitImageSmoothingEnabled = false;
 	canvas.imageSmoothing = false;
 	var world = new World();
+	var mouse_position = { x: 200, y: 200 };
 
 	var player_images = new Image();
 	player_images.src="/lofi_char.png";
@@ -33,6 +34,11 @@ $(function () {
 		socket.emit('move-player', {x:x,y:y});
 	});
 
+	$(document).mousemove(function(event) {
+		var posX = $('#play-canvas').offset().left, posY = $('#play-canvas').offset().top;
+        mouse_position = { x:event.pageX - posX, y:event.pageY - posY };
+    });
+
 	socket.on('connect', function() {
 		socket.emit('identify', me);
 	});
@@ -51,7 +57,7 @@ $(function () {
 	socket.on('status', function(data) {
 		world.players = data.players_online;
 		var num_players = world.
-			flattenArray(world.players).
+			flatten(world.players).
 			filter(function(player) {return player.type == 'human';})
 			.length;
 		$('#status-users').text(num_players);
@@ -90,11 +96,25 @@ $(function () {
 		var strip_width = player_images.width / 8;
 		for (player_id in world.players) {
 			var player = world.players[player_id];
-			canvas.fillText(player.name, player.x, player.y);
+			canvas.textAlign = 'center';
+			canvas.fillText(player.name, player.x, player.y - 9);
 			canvas.drawImage(player_images,
 				8 * (player.image % strip_width), 8 * Math.floor(player.image / strip_width), 8, 8,
-				player.x, player.y, 16, 16);
+				player.x - 8, player.y - 8, 16, 16);
 		};
+
+		var all_players = world.flatten(world.players);
+		if (all_players.length) {
+			var closest_player = all_players
+				.sort(function(a, b) { return world.distance(mouse_position, a) - world.distance(mouse_position, b); })[0];
+			if (world.distance(mouse_position, closest_player) < 32) {
+				canvas.strokeStyle = '#ffffff';
+				canvas.beginPath();
+				canvas.arc(closest_player.x, closest_player.y, 32, 0, Math.PI * 2);
+				canvas.closePath();
+				canvas.stroke();
+			}
+		}
 
 		if (window.requestAnimationFrame)
 			window.requestAnimationFrame(drawFrame);
