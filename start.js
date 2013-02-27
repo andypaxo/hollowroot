@@ -1,5 +1,5 @@
 var world = new (require('./public/hollowroot_world.js').World)();
-world.players.gremlin = {name:'gremlin', x:200, y:200, image:80};
+world.players.gremlin = {name:'gremlin', x:200, y:200, image:80, type:'npc'};
 
 var express = require('express'),
 app = express(),
@@ -16,7 +16,7 @@ var time_step = .4;
 io.sockets.on('connection', function (socket) {
 
 	console.log(socket.id + ' connected');
-	world.players[socket.id] = {x:20,y:20};
+	world.players[socket.id] = {x:20,y:20,type:'human'};
 	socket.emit('allocate-id', {id:socket.id, now:world.now()});
 
 	socket.on('identify', function (data) {

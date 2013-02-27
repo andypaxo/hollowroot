@@ -50,7 +50,11 @@ $(function () {
 
 	socket.on('status', function(data) {
 		world.players = data.players_online;
-		$('#status-users').text(Object.keys(world.players).length);
+		var num_players = world.
+			flattenArray(world.players).
+			filter(function(player) {return player.type == 'human';})
+			.length;
+		$('#status-users').text(num_players);
 	});
 
 	function updatePlayers(players) {
@@ -62,8 +66,6 @@ $(function () {
 				local_player.x = server_player.x;
 				local_player.y = server_player.y;
 			}
-			// local_player.x = (server_player.x + local_player.x) / 2;
-			// local_player.y = (server_player.y + local_player.y) / 2;
 		}
 	}
 
@@ -72,7 +74,7 @@ $(function () {
 	}
 
 	function makeName() {
-		var names = ['Tik', 'Bok', 'Toc', 'Pon', 'Kip', 'Bin', 'Fon'];
+		var names = ['Tik', 'Bok', 'Toc', 'Pon', 'Kip', 'Bin', 'Fon', 'Doc', 'Gup', 'Hin'];
 		return pickRandomFrom(names) + '-' + pickRandomFrom(names);
 	}
 
